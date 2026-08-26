@@ -1,0 +1,2 @@
+Input #0 → escribí 'test0', quedó 'test0'
+Input #4 → escribí 'test4', quedó 'test4'
