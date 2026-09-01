@@ -13,7 +13,11 @@ public class AIAnalyzer {
 
     private static final String API_KEY = System.getenv("OPENROUTER_API_KEY"); // reemplazá con tu key completa
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .build();
     private final Gson gson = new Gson();
 
     public String analizarResultados(String resultadosTest) {
@@ -24,7 +28,7 @@ public class AIAnalyzer {
                 + "Resultados:\n" + resultadosTest;
 
         String requestBody = "{"
-                + "\"model\": \"nvidia/nemotron-3-nano-30b-a3b:free\","
+                + "\"model\": \"openrouter/free\","
                 + "\"messages\": [{\"role\": \"user\", \"content\": " + gson.toJson(prompt) + "}]"
                 + "}";
 

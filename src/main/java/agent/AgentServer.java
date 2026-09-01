@@ -40,22 +40,8 @@ public class AgentServer {
             TestCaseGenerator generator = new TestCaseGenerator();
             String casos = generator.generar(info);
 
-            String resultados = "Análisis visual de la página gub.uy:\n"
-                    + "- Campo 'search_api_fulltext': presente, es el buscador principal del portal\n"
-                    + "- Botón 'User': visible y clickeable\n"
-                    + "- Botón 'Abrir buscador': visible y clickeable\n"
-                    + "- Botón 'Menú': visible y clickeable\n"
-                    + "- Botón 'Buscar': visible y clickeable\n"
-                    + "- Botón 'Cerrar': visible y clickeable\n"
-                    + "- Botón 'Desplegar Menú': visible y clickeable\n"
-                    + "- Total inputs detectados: 1\n"
-                    + "- Total formularios detectados: 1\n"
-                    + "- Total botones detectados: 8\n"
-                    + "- Observación: el campo de búsqueda no valida contenido mínimo antes de enviar\n"
-                    + "- Observación: no hay mensajes de error si se envía búsqueda vacía\n"
-                    + "- Observación: el portal no requiere autenticación para navegar\n"
-                    + "- Observación: todos los botones de navegación responden correctamente";
-
+            PlaywrightTestExecutor executor = new PlaywrightTestExecutor(page);
+            String resultados = executor.ejecutarTests(info);
             contextoAnalisis = "URL analizada: " + url + "\n"
                     + "Botones encontrados: " + info.buttonTexts.size() + "\n"
                     + "Inputs encontrados: " + info.inputNames.size() + "\n"
@@ -85,11 +71,12 @@ public class AgentServer {
         String html = """
             <!DOCTYPE html>
             <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>QA AI Agent</title>
-                <style>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>QA AI Agent</title>
+                    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>   ←← ACÁ (línea nueva)
+                    <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
                     header { background: #1a1a2e; padding: 16px 24px; border-bottom: 1px solid #2a2a4a; display: flex; align-items: center; gap: 12px; }
@@ -144,7 +131,7 @@ public class AgentServer {
                         });
                         const respuesta = await res.text();
                         document.getElementById('typing').remove();
-                        chat.innerHTML += `<div class="msg agent">${respuesta}</div>`;
+                         chat.innerHTML += `<div class="msg agent">${marked.parse(respuesta)}</div>`;
                         chat.scrollTop = chat.scrollHeight;
                     }
                 </script>
