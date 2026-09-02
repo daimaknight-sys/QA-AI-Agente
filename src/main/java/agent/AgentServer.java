@@ -10,10 +10,10 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 import execution.PlaywrightTestExecutor;
 import generator.TestCaseGenerator;
-
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import security.XssScanner;
 
 public class AgentServer {
 
@@ -42,6 +42,11 @@ public class AgentServer {
 
             PlaywrightTestExecutor executor = new PlaywrightTestExecutor(page);
             String resultados = executor.ejecutarTests(info);
+            XssScanner xssScanner = new XssScanner();
+            java.util.List<String> hallazgosXss = xssScanner.escanear(url);
+            String reporteXss = hallazgosXss.isEmpty()
+                    ? "No se detectaron reflejos de XSS en los inputs analizados."
+                    : String.join("\n", hallazgosXss);
             contextoAnalisis = "URL analizada: " + url + "\n"
                     + "Botones encontrados: " + info.buttonTexts.size() + "\n"
                     + "Inputs encontrados: " + info.inputNames.size() + "\n"
@@ -49,7 +54,15 @@ public class AgentServer {
                     + "Nombres de inputs: " + info.inputNames + "\n"
                     + "Textos de botones: " + info.buttonTexts + "\n\n"
                     + "Casos de test generados:\n" + casos + "\n"
-                    + "Resultados reales:\n" + resultados;
+            //contextoAnalisis = "URL analizada: " + url + "\n"
+                    + "Botones encontrados: " + info.buttonTexts.size() + "\n"
+                    + "Inputs encontrados: " + info.inputNames.size() + "\n"
+                    + "Formularios: " + (info.hasForm ? "Sí" : "No") + "\n"
+                    + "Nombres de inputs: " + info.inputNames + "\n"
+                    + "Textos de botones: " + info.buttonTexts + "\n\n"
+                    + "Casos de test generados:\n" + casos + "\n"
+                    + "Resultados reales:\n" + resultados + "\n\n"
+                    + "Análisis de seguridad (XSS reflejado):\n" + reporteXss;
 
             urlAnalizada = url;
             try { browser.close(); } catch (Exception ignored) {}
