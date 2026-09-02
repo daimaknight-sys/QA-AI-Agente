@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>Reporte QA - Agente IA</title><style>body { font-family: Arial, sans-serif; background:#f4f4f9; color:#222; padding:24px; }h1 { color:#7c6af7; }h2 { border-bottom:2px solid #7c6af7; padding-bottom:6px; margin-top:32px; }section { background:white; border-radius:8px; padding:16px 24px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.1); }pre { white-space:pre-wrap; font-family:Consolas,monospace; font-size:13px; }.ok { color:#2e7d32; }.warn { color:#c62828; font-weight:bold; }table { border-collapse:collapse; width:100%; }td, th { border:1px solid #ddd; padding:8px; text-align:left; }</style></head><body><h1>Reporte de Análisis QA</h1><p><strong>URL analizada:</strong> https://www.gub.uy</p><section><h2>Resumen de la página</h2><table><tr><th>Botones encontrados</th><td>6</td></tr><tr><th>Inputs encontrados</th><td>1</td></tr><tr><th>Formularios</th><td>Sí</td></tr></table></section><section><h2>Inputs</h2><pre>search_api_fulltext</pre></section><section><h2>Botones</h2><pre>User
+Abrir buscador y  Buscar
+Menú
+Buscar
+Abierta 
+        
+        
+          
+            
+            
+          
+          Cerrar 
+        	
+        Desplegar Menú
+Abrir buscador
+          
+            
+            
+          
+        
+        
+          Cerrar buscador</pre></section><section><h2>Casos de test generados</h2><pre>Caso sugerido: Verificar que el campo 'search_api_fulltext' acepte texto
+Caso sugerido: Verificar que el botón 'User' sea clickeable
+Caso sugerido: Verificar que el botón 'Abrir buscador y  Buscar' sea clickeable
+Caso sugerido: Verificar que el botón 'Menú' sea clickeable
+Caso sugerido: Verificar que el botón 'Buscar' sea clickeable
+Caso sugerido: Verificar que el botón 'Abierta 
+        
+        
+          
+            
+            
+          
+          Cerrar 
+        	
+        Desplegar Menú' sea clickeable
+Caso sugerido: Verificar que el botón 'Abrir buscador
+          
+            
+            
+          
+        
+        
+          Cerrar buscador' sea clickeable
+Caso sugerido: Verificar el envío del formulario con datos válidos
+</pre></section><section><h2>Resultados de ejecución</h2><pre>❌ FAIL: Campo 'search_api_fulltext' → Error {
+❌ FAIL: Botón 'User' → no encontrado
+✅ PASS: Botón 'Abrir buscador y  Buscar' es visible y clickeable
+❌ FAIL: Botón 'Menú' → no encontrado
+✅ PASS: Botón 'Buscar' es visible y clickeable
+❌ FAIL: Botón 'Abierta 
+        
+        
+          
+            
+            
+          
+          Cerrar 
+        	
+        Desplegar Menú' → no encontrado
+✅ PASS: Formulario presente (1 forms)
+</pre></section><section><h2>Análisis de seguridad (XSS reflejado)</h2><pre class='ok'>No se detectaron reflejos de XSS en los inputs analizados.</pre></section></body></html>

@@ -14,12 +14,20 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import security.XssScanner;
+import util.HtmlReportWriter;
 
 public class AgentServer {
 
     private static String contextoAnalisis = "";
     private static String urlAnalizada = "";
 
+    private static void handleReporte(HttpExchange exchange) throws IOException {
+        byte[] bytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("reporte_qa.html"));
+        exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+        exchange.sendResponseHeaders(200, bytes.length);
+        exchange.getResponseBody().write(bytes);
+        exchange.getResponseBody().close();
+    }
     public static void main(String[] args) throws Exception {
 
         String url = "https://www.gub.uy";
@@ -64,6 +72,9 @@ public class AgentServer {
                     + "Resultados reales:\n" + resultados + "\n\n"
                     + "Análisis de seguridad (XSS reflejado):\n" + reporteXss;
 
+            HtmlReportWriter htmlReport = new HtmlReportWriter();
+            htmlReport.generar("reporte_qa.html", url, info, casos, resultados, reporteXss);
+
             urlAnalizada = url;
             try { browser.close(); } catch (Exception ignored) {}
         }
@@ -74,10 +85,11 @@ public class AgentServer {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         server.createContext("/", AgentServer::handleRoot);
         server.createContext("/chat", AgentServer::handleChat);
+        server.createContext("/reporte", AgentServer::handleReporte);
         server.start();
-
         System.out.println("🌐 Servidor iniciado en: http://localhost:8080");
         System.out.println("Abrí tu navegador en http://localhost:8080");
+        System.out.println("📄 Reporte QA: http://localhost:8080/reporte");
     }
 
     private static void handleRoot(HttpExchange exchange) throws IOException {
