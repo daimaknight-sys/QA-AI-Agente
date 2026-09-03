@@ -37,3 +37,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Reportes generados por el agente ###
+reporte_qa*.txt
+reporte_qa.html
+reporte_xss.txt
