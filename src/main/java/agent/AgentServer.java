@@ -15,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import security.XssScanner;
 import util.HtmlReportWriter;
+import crawler.WebCrawler;
 
 public class AgentServer {
 
@@ -28,6 +29,7 @@ public class AgentServer {
         exchange.getResponseBody().write(bytes);
         exchange.getResponseBody().close();
     }
+
     public static void main(String[] args) throws Exception {
 
         String url = "https://www.gub.uy";
@@ -45,16 +47,43 @@ public class AgentServer {
             PageAnalyzer analyzer = new PageAnalyzer();
             PageInfo info = analyzer.analyze(page);
 
+            WebCrawler crawler = new WebCrawler();
+            java.util.List<WebCrawler.PaginaResultado> paginasSitio = crawler.crawlMultiple(url, 50);
+
+            int totalInputsSitio = 0;
+            int totalBotonesSitio = 0;
+            int totalFormsSitio = 0;
+            StringBuilder resumenPaginas = new StringBuilder();
+
+            for (WebCrawler.PaginaResultado pagina : paginasSitio) {
+                totalInputsSitio += pagina.info.inputNames.size();
+                totalBotonesSitio += pagina.info.buttonTexts.size();
+                if (pagina.info.hasForm) totalFormsSitio++;
+                resumenPaginas.append("- ").append(pagina.url)
+                        .append(" (inputs: ").append(pagina.info.inputNames.size())
+                        .append(", botones: ").append(pagina.info.buttonTexts.size())
+                        .append(", form: ").append(pagina.info.hasForm ? "sí" : "no")
+                        .append(")\n");
+            }
+
+            String reporteSitio = "Páginas analizadas del sitio: " + paginasSitio.size() + "\n"
+                    + "Total de inputs en el sitio: " + totalInputsSitio + "\n"
+                    + "Total de botones en el sitio: " + totalBotonesSitio + "\n"
+                    + "Páginas con formulario: " + totalFormsSitio + "\n\n"
+                    + "Detalle por página:\n" + resumenPaginas;
+
             TestCaseGenerator generator = new TestCaseGenerator();
             String casos = generator.generar(info);
 
             PlaywrightTestExecutor executor = new PlaywrightTestExecutor(page);
             String resultados = executor.ejecutarTests(info);
+
             XssScanner xssScanner = new XssScanner();
             java.util.List<String> hallazgosXss = xssScanner.escanear(url);
             String reporteXss = hallazgosXss.isEmpty()
                     ? "No se detectaron reflejos de XSS en los inputs analizados."
                     : String.join("\n", hallazgosXss);
+
             contextoAnalisis = "URL analizada: " + url + "\n"
                     + "Botones encontrados: " + info.buttonTexts.size() + "\n"
                     + "Inputs encontrados: " + info.inputNames.size() + "\n"
@@ -62,15 +91,9 @@ public class AgentServer {
                     + "Nombres de inputs: " + info.inputNames + "\n"
                     + "Textos de botones: " + info.buttonTexts + "\n\n"
                     + "Casos de test generados:\n" + casos + "\n"
-            //contextoAnalisis = "URL analizada: " + url + "\n"
-                    + "Botones encontrados: " + info.buttonTexts.size() + "\n"
-                    + "Inputs encontrados: " + info.inputNames.size() + "\n"
-                    + "Formularios: " + (info.hasForm ? "Sí" : "No") + "\n"
-                    + "Nombres de inputs: " + info.inputNames + "\n"
-                    + "Textos de botones: " + info.buttonTexts + "\n\n"
-                    + "Casos de test generados:\n" + casos + "\n"
                     + "Resultados reales:\n" + resultados + "\n\n"
-                    + "Análisis de seguridad (XSS reflejado):\n" + reporteXss;
+                    + "Análisis de seguridad (XSS reflejado):\n" + reporteXss + "\n\n"
+                    + "Análisis del sitio completo (crawling multi-página):\n" + reporteSitio;
 
             HtmlReportWriter htmlReport = new HtmlReportWriter();
             htmlReport.generar("reporte_qa.html", url, info, casos, resultados, reporteXss);
@@ -100,7 +123,7 @@ public class AgentServer {
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>QA AI Agent</title>
-                    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>   ←← ACÁ (línea nueva)
+                    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
                     <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }

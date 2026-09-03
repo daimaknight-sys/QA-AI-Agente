@@ -15,6 +15,9 @@ import java.util.Set;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class WebCrawler {
 
@@ -87,6 +90,101 @@ public class WebCrawler {
             browser.close();
         }
 
+
         return links;
+    }
+
+    public List<PaginaResultado> crawlMultiple(String urlInicial, int maxPaginas) {
+        List<PaginaResultado> resultados = new ArrayList<>();
+        Set<String> visitadas = new HashSet<>();
+        Queue<String> porVisitar = new LinkedList<>();
+        porVisitar.add(normalizarUrl(urlInicial));
+
+        String dominio = obtenerDominio(urlInicial);
+
+        try (Playwright playwright = Playwright.create()) {
+            Browser browser = playwright.chromium().launch(
+                    new BrowserType.LaunchOptions().setHeadless(true));
+
+            while (!porVisitar.isEmpty() && visitadas.size() < maxPaginas) {
+                String urlActual = porVisitar.poll();
+
+                if (visitadas.contains(urlActual)) continue;
+                visitadas.add(urlActual);
+
+                try {
+                    Page page = browser.newPage();
+                    page.navigate(urlActual, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+                    page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+
+                    PageAnalyzer analyzer = new PageAnalyzer();
+                    PageInfo info = analyzer.analyze(page);
+
+                    resultados.add(new PaginaResultado(urlActual, info));
+                    System.out.println("✅ Analizada (" + visitadas.size() + "/" + maxPaginas + "): " + urlActual);
+
+                    // Recolectar links nuevos del mismo dominio
+                    List<ElementHandle> elements = page.querySelectorAll("a");
+                    for (ElementHandle element : elements) {
+                        String href = element.getAttribute("href");
+                        if (href != null && !href.isEmpty()) {
+                            String absoluta = resolverUrl(urlActual, href);
+                            if (absoluta != null && absoluta.contains("#")) {
+                                absoluta = absoluta.substring(0, absoluta.indexOf("#"));
+                            }
+                            absoluta = normalizarUrl(absoluta);
+                            if (absoluta != null && obtenerDominio(absoluta).equals(dominio)
+                                    && !visitadas.contains(absoluta)) {
+                                porVisitar.add(absoluta);
+                            }
+                        }
+                    }
+
+                    page.close();
+                } catch (Exception e) {
+                    System.out.println("⚠ Error analizando " + urlActual + ": " + e.getMessage());
+                }
+            }
+
+            browser.close();
+        }
+
+        return resultados;
+
+    }
+
+    private String obtenerDominio(String url) {
+        try {
+            String host = new java.net.URI(url).getHost();
+            return host != null ? host : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private String resolverUrl(String base, String href) {
+        try {
+            return new java.net.URI(base).resolve(href).toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String normalizarUrl(String url) {
+        if (url == null) return null;
+        if (url.endsWith("/") && url.length() > 1) {
+            return url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
+
+    public static class PaginaResultado {
+        public String url;
+        public PageInfo info;
+
+        public PaginaResultado(String url, PageInfo info) {
+            this.url = url;
+            this.info = info;
+        }
     }
 }
