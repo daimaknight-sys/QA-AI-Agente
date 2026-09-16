@@ -3,6 +3,8 @@ package agent;
 import ai.AIAnalyzer;
 import analyzer.PageAnalyzer;
 import analyzer.PageInfo;
+import api.ApiEndpointSniffer;
+import api.ApiEndpointInfo;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.WaitUntilState;
 import com.microsoft.playwright.options.LoadState;
@@ -10,6 +12,9 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 import execution.PlaywrightTestExecutor;
 import generator.TestCaseGenerator;
+import generator.PageObjectGenerator;
+import generator.TestClassGenerator;
+import generator.ApiTestGenerator;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +37,7 @@ public class AgentServer {
 
     public static void main(String[] args) throws Exception {
 
-        String url = "https://www.gub.uy";
+        String url = "https://www.tata.com.uy/";
 
         System.out.println("🤖 Iniciando análisis de: " + url);
 
@@ -41,6 +46,12 @@ public class AgentServer {
             Browser browser = playwright.chromium().launch(
                     new BrowserType.LaunchOptions().setHeadless(true).setTimeout(30000));
             Page page = browser.newPage();
+
+            // Una sola instancia del sniffer para todo el análisis: captura tanto la
+            // carga inicial de la home como cada página que visite crawlMultiple.
+            ApiEndpointSniffer apiSniffer = new ApiEndpointSniffer();
+            apiSniffer.attach(page);
+
             page.navigate(url, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);
 
@@ -48,7 +59,13 @@ public class AgentServer {
             PageInfo info = analyzer.analyze(page);
 
             WebCrawler crawler = new WebCrawler();
-            java.util.List<WebCrawler.PaginaResultado> paginasSitio = crawler.crawlMultiple(url, 50);
+            java.util.List<WebCrawler.PaginaResultado> paginasSitio = crawler.crawlMultiple(url, 50, apiSniffer);
+
+            java.util.List<ApiEndpointInfo> endpointsDetectados = apiSniffer.getEndpointsFiltrados();
+            System.out.println("🔌 Endpoints de API detectados: " + endpointsDetectados.size());
+            for (ApiEndpointInfo ep : endpointsDetectados) {
+                System.out.println("   " + ep);
+            }
 
             int totalInputsSitio = 0;
             int totalBotonesSitio = 0;
@@ -72,11 +89,65 @@ public class AgentServer {
                     + "Páginas con formulario: " + totalFormsSitio + "\n\n"
                     + "Detalle por página:\n" + resumenPaginas;
 
-            TestCaseGenerator generator = new TestCaseGenerator();
-            String casos = generator.generar(info);
+            // OJO: la variable NO puede llamarse "generator" porque taparía el nombre del paquete
+            TestCaseGenerator casosGenerator = new TestCaseGenerator();
+            String casos = casosGenerator.generar(info);
+
+            // ===== Generación automática de Page Object + tests Playwright =====
+            String claseBase = inferirNombreClase(url);
+            String pageClassName = claseBase + "Page";
+            String testClassName = claseBase + "Test";
+
+            PageObjectGenerator pogen = new PageObjectGenerator();
+            PageObjectGenerator.Result pageObjectResult = pogen.generate(pageClassName, info);
+            writer.JavaTestWriter.escribirPageObject(pageClassName, pageObjectResult.code);
+
+            TestClassGenerator tcgen = new TestClassGenerator();
+            String testCode = tcgen.generate(pageClassName, testClassName, info, url,
+                    pageObjectResult.inputFillMethods, pageObjectResult.buttonClickMethods);
+            writer.JavaTestWriter.escribirTest(testClassName, testCode);
+
+            System.out.println("📦 Page Object y test Playwright generados: " + pageClassName + " / " + testClassName);
+            // ===== Fin generación automática =====
+
+            // ===== Generación automática de tests de API =====
+            if (!endpointsDetectados.isEmpty()) {
+                ApiTestGenerator apiTestGen = new ApiTestGenerator();
+                String apiTestClassName = claseBase + "ApiTest";
+                String apiTestCode = apiTestGen.generate(apiTestClassName, endpointsDetectados);
+                writer.JavaTestWriter.escribirTest(apiTestClassName, apiTestCode);
+                System.out.println("📦 Test de API generado: " + apiTestClassName
+                        + " (" + endpointsDetectados.size() + " endpoints)");
+            } else {
+                System.out.println("ℹ️ No se detectaron endpoints de API para generar tests.");
+            }
+            // ===== Fin generación de tests de API =====
 
             PlaywrightTestExecutor executor = new PlaywrightTestExecutor(page);
             String resultados = executor.ejecutarTests(info);
+
+            // ===== Resumen de cobertura: reconcilia "casos generados" vs "elementos evaluados" =====
+            int inputsOmitidos = 0;
+            for (String nombre : info.inputNames) {
+                if (nombre.startsWith("input_tipo_") || nombre.startsWith("input_sin_")) inputsOmitidos++;
+            }
+            int botonesOmitidos = 0;
+            for (String texto : info.buttonTexts) {
+                if (texto.startsWith("boton_sin_texto_")) botonesOmitidos++;
+            }
+            int inputsEvaluados = info.inputNames.size() - inputsOmitidos;
+            int botonesEvaluados = info.buttonTexts.size() - botonesOmitidos;
+
+            String resumenEjecucion = "Resumen de cobertura:\n"
+                    + "- Inputs evaluados: " + inputsEvaluados + " de " + info.inputNames.size()
+                    + " encontrados (" + inputsOmitidos + " omitidos por no tener identificador utilizable)\n"
+                    + "- Botones evaluados: " + botonesEvaluados + " de " + info.buttonTexts.size()
+                    + " encontrados (" + botonesOmitidos + " omitidos por no tener texto visible/aria-label)\n"
+                    + (info.hasForm ? "- Formulario: evaluado\n" : "- Formulario: no detectado\n")
+                    + "\n";
+
+            resultados = resumenEjecucion + resultados;
+            // ===== Fin resumen de cobertura =====
 
             XssScanner xssScanner = new XssScanner();
             java.util.List<String> hallazgosXss = xssScanner.escanear(url);
@@ -93,6 +164,7 @@ public class AgentServer {
                     + "Casos de test generados:\n" + casos + "\n"
                     + "Resultados reales:\n" + resultados + "\n\n"
                     + "Análisis de seguridad (XSS reflejado):\n" + reporteXss + "\n\n"
+                    + "Endpoints de API detectados: " + endpointsDetectados.size() + "\n\n"
                     + "Análisis del sitio completo (crawling multi-página):\n" + reporteSitio;
 
             HtmlReportWriter htmlReport = new HtmlReportWriter();
@@ -113,6 +185,13 @@ public class AgentServer {
         System.out.println("🌐 Servidor iniciado en: http://localhost:8080");
         System.out.println("Abrí tu navegador en http://localhost:8080");
         System.out.println("📄 Reporte QA: http://localhost:8080/reporte");
+    }
+
+    private static String inferirNombreClase(String url) {
+        String host = url.replaceAll("https?://", "").replaceAll("www\\.", "");
+        String[] parts = host.split("\\.");
+        String base = parts[0];
+        return Character.toUpperCase(base.charAt(0)) + base.substring(1).toLowerCase();
     }
 
     private static void handleRoot(HttpExchange exchange) throws IOException {

@@ -3,6 +3,7 @@ package crawler;
 import ai.AIAnalyzer;
 import analyzer.PageAnalyzer;
 import analyzer.PageInfo;
+import api.ApiEndpointSniffer;
 import execution.PlaywrightTestExecutor;
 import generator.TestCaseGenerator;
 import util.ReportWriter;
@@ -90,11 +91,19 @@ public class WebCrawler {
             browser.close();
         }
 
-
         return links;
     }
 
     public List<PaginaResultado> crawlMultiple(String urlInicial, int maxPaginas) {
+        return crawlMultiple(urlInicial, maxPaginas, null);
+    }
+
+    /**
+     * @param sniffer opcional: si no es null, se engancha a CADA página nueva que el
+     *                crawler abre (antes de navegar), para capturar los endpoints de
+     *                API que esa página dispare. Pasá null para el comportamiento de antes.
+     */
+    public List<PaginaResultado> crawlMultiple(String urlInicial, int maxPaginas, ApiEndpointSniffer sniffer) {
         List<PaginaResultado> resultados = new ArrayList<>();
         Set<String> visitadas = new HashSet<>();
         Queue<String> porVisitar = new LinkedList<>();
@@ -114,6 +123,13 @@ public class WebCrawler {
 
                 try {
                     Page page = browser.newPage();
+
+                    // Enganchamos el sniffer ANTES de navegar, para no perdernos
+                    // los requests que dispara la carga inicial de la página.
+                    if (sniffer != null) {
+                        sniffer.attach(page);
+                    }
+
                     page.navigate(urlActual, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
                     page.waitForLoadState(LoadState.DOMCONTENTLOADED);
 
@@ -150,7 +166,6 @@ public class WebCrawler {
         }
 
         return resultados;
-
     }
 
     private String obtenerDominio(String url) {

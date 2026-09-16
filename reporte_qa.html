@@ -1,62 +1,172 @@
-<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>Reporte QA - Agente IA</title><style>body { font-family: Arial, sans-serif; background:#f4f4f9; color:#222; padding:24px; }h1 { color:#7c6af7; }h2 { border-bottom:2px solid #7c6af7; padding-bottom:6px; margin-top:32px; }section { background:white; border-radius:8px; padding:16px 24px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.1); }pre { white-space:pre-wrap; font-family:Consolas,monospace; font-size:13px; }.ok { color:#2e7d32; }.warn { color:#c62828; font-weight:bold; }table { border-collapse:collapse; width:100%; }td, th { border:1px solid #ddd; padding:8px; text-align:left; }</style></head><body><h1>Reporte de Análisis QA</h1><p><strong>URL analizada:</strong> https://www.gub.uy</p><section><h2>Resumen de la página</h2><table><tr><th>Botones encontrados</th><td>6</td></tr><tr><th>Inputs encontrados</th><td>1</td></tr><tr><th>Formularios</th><td>Sí</td></tr></table></section><section><h2>Inputs</h2><pre>search_api_fulltext</pre></section><section><h2>Botones</h2><pre>User
-Abrir buscador y  Buscar
-Menú
+<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>Reporte QA - Agente IA</title><style>body { font-family: Arial, sans-serif; background:#f4f4f9; color:#222; padding:24px; }h1 { color:#7c6af7; }h2 { border-bottom:2px solid #7c6af7; padding-bottom:6px; margin-top:32px; }section { background:white; border-radius:8px; padding:16px 24px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.1); }pre { white-space:pre-wrap; font-family:Consolas,monospace; font-size:13px; }.ok { color:#2e7d32; }.warn { color:#c62828; font-weight:bold; }table { border-collapse:collapse; width:100%; }td, th { border:1px solid #ddd; padding:8px; text-align:left; }</style></head><body><h1>Reporte de Análisis QA</h1><p><strong>URL analizada:</strong> https://www.tata.com.uy/</p><section><h2>Resumen de la página</h2><table><tr><th>Botones encontrados</th><td>32</td></tr><tr><th>Inputs encontrados</th><td>5</td></tr><tr><th>Formularios</th><td>Sí</td></tr></table></section><section><h2>Inputs</h2><pre>Buscar
 Buscar
-Abierta 
-        
-        
-          
-            
-            
-          
-          Cerrar 
-        	
-        Desplegar Menú
-Abrir buscador
-          
-            
-            
-          
-        
-        
-          Cerrar buscador</pre></section><section><h2>Casos de test generados</h2><pre>Caso sugerido: Verificar que el campo 'search_api_fulltext' acepte texto
-Caso sugerido: Verificar que el botón 'User' sea clickeable
-Caso sugerido: Verificar que el botón 'Abrir buscador y  Buscar' sea clickeable
-Caso sugerido: Verificar que el botón 'Menú' sea clickeable
-Caso sugerido: Verificar que el botón 'Buscar' sea clickeable
-Caso sugerido: Verificar que el botón 'Abierta 
-        
-        
-          
-            
-            
-          
-          Cerrar 
-        	
-        Desplegar Menú' sea clickeable
-Caso sugerido: Verificar que el botón 'Abrir buscador
-          
-            
-            
-          
-        
-        
-          Cerrar buscador' sea clickeable
-Caso sugerido: Verificar el envío del formulario con datos válidos
-</pre></section><section><h2>Resultados de ejecución</h2><pre>❌ FAIL: Campo 'search_api_fulltext' → Error {
-❌ FAIL: Botón 'User' → no encontrado
-✅ PASS: Botón 'Abrir buscador y  Buscar' es visible y clickeable
-❌ FAIL: Botón 'Menú' → no encontrado
-✅ PASS: Botón 'Buscar' es visible y clickeable
-❌ FAIL: Botón 'Abierta 
-        
-        
-          
-            
-            
-          
-          Cerrar 
-        	
-        Desplegar Menú' → no encontrado
-✅ PASS: Formulario presente (1 forms)
+Buscar
+Buscar
+newsletter-email</pre></section><section><h2>Botones</h2><pre>boton_sin_texto_0
+boton_sin_texto_1
+boton_sin_texto_2
+boton_sin_texto_3
+TaTa
+boton_sin_texto_5
+TaTa
+boton_sin_texto_7
+boton_sin_texto_8
+boton_sin_texto_9
+CATEGORÍAS
+boton_sin_texto_11
+boton_sin_texto_12
+TaTa
+boton_sin_texto_14
+TaTa
+boton_sin_texto_16
+boton_sin_texto_17
+boton_sin_texto_18
+CATEGORÍAS
+boton_sin_texto_20
+boton_sin_texto_21
+boton_sin_texto_22
+boton_sin_texto_23
+boton_sin_texto_24
+boton_sin_texto_25
+boton_sin_texto_26
+boton_sin_texto_27
+boton_sin_texto_28
+Tata
+Beneficios
+Mis Compras</pre></section><section><h2>Casos de test generados</h2><pre>=== CASOS DE PRUEBA GENERADOS ===
+
+1. HAPPY PATH
+   Completar todos los campos con datos válidos (Buscar, Buscar, Buscar, Buscar, newsletter-email) y enviar el formulario.
+
+2. NEGATIVE - CAMPOS VACÍOS
+   Enviar el formulario sin completar ningún campo y verificar mensajes de validación.
+
+3. BOUNDARY/NEGATIVE - BUSCAR
+   Probar el campo 'Buscar' con datos inválidos, valores límite y caracteres especiales.
+
+4. BOUNDARY/NEGATIVE - BUSCAR
+   Probar el campo 'Buscar' con datos inválidos, valores límite y caracteres especiales.
+
+5. BOUNDARY/NEGATIVE - BUSCAR
+   Probar el campo 'Buscar' con datos inválidos, valores límite y caracteres especiales.
+
+6. BOUNDARY/NEGATIVE - BUSCAR
+   Probar el campo 'Buscar' con datos inválidos, valores límite y caracteres especiales.
+
+7. BOUNDARY/NEGATIVE - NEWSLETTER-EMAIL
+   Probar el campo 'newsletter-email' con datos inválidos, valores límite y caracteres especiales.
+
+8. INTERACCIÓN - BOTÓN 'boton_sin_texto_0'
+   Verificar que el botón 'boton_sin_texto_0' realiza la acción esperada y maneja errores correctamente.
+
+9. INTERACCIÓN - BOTÓN 'boton_sin_texto_1'
+   Verificar que el botón 'boton_sin_texto_1' realiza la acción esperada y maneja errores correctamente.
+
+10. INTERACCIÓN - BOTÓN 'boton_sin_texto_2'
+   Verificar que el botón 'boton_sin_texto_2' realiza la acción esperada y maneja errores correctamente.
+
+11. INTERACCIÓN - BOTÓN 'boton_sin_texto_3'
+   Verificar que el botón 'boton_sin_texto_3' realiza la acción esperada y maneja errores correctamente.
+
+12. INTERACCIÓN - BOTÓN 'TaTa'
+   Verificar que el botón 'TaTa' realiza la acción esperada y maneja errores correctamente.
+
+13. INTERACCIÓN - BOTÓN 'boton_sin_texto_5'
+   Verificar que el botón 'boton_sin_texto_5' realiza la acción esperada y maneja errores correctamente.
+
+14. INTERACCIÓN - BOTÓN 'TaTa'
+   Verificar que el botón 'TaTa' realiza la acción esperada y maneja errores correctamente.
+
+15. INTERACCIÓN - BOTÓN 'boton_sin_texto_7'
+   Verificar que el botón 'boton_sin_texto_7' realiza la acción esperada y maneja errores correctamente.
+
+16. INTERACCIÓN - BOTÓN 'boton_sin_texto_8'
+   Verificar que el botón 'boton_sin_texto_8' realiza la acción esperada y maneja errores correctamente.
+
+17. INTERACCIÓN - BOTÓN 'boton_sin_texto_9'
+   Verificar que el botón 'boton_sin_texto_9' realiza la acción esperada y maneja errores correctamente.
+
+18. INTERACCIÓN - BOTÓN 'CATEGORÍAS'
+   Verificar que el botón 'CATEGORÍAS' realiza la acción esperada y maneja errores correctamente.
+
+19. INTERACCIÓN - BOTÓN 'boton_sin_texto_11'
+   Verificar que el botón 'boton_sin_texto_11' realiza la acción esperada y maneja errores correctamente.
+
+20. INTERACCIÓN - BOTÓN 'boton_sin_texto_12'
+   Verificar que el botón 'boton_sin_texto_12' realiza la acción esperada y maneja errores correctamente.
+
+21. INTERACCIÓN - BOTÓN 'TaTa'
+   Verificar que el botón 'TaTa' realiza la acción esperada y maneja errores correctamente.
+
+22. INTERACCIÓN - BOTÓN 'boton_sin_texto_14'
+   Verificar que el botón 'boton_sin_texto_14' realiza la acción esperada y maneja errores correctamente.
+
+23. INTERACCIÓN - BOTÓN 'TaTa'
+   Verificar que el botón 'TaTa' realiza la acción esperada y maneja errores correctamente.
+
+24. INTERACCIÓN - BOTÓN 'boton_sin_texto_16'
+   Verificar que el botón 'boton_sin_texto_16' realiza la acción esperada y maneja errores correctamente.
+
+25. INTERACCIÓN - BOTÓN 'boton_sin_texto_17'
+   Verificar que el botón 'boton_sin_texto_17' realiza la acción esperada y maneja errores correctamente.
+
+26. INTERACCIÓN - BOTÓN 'boton_sin_texto_18'
+   Verificar que el botón 'boton_sin_texto_18' realiza la acción esperada y maneja errores correctamente.
+
+27. INTERACCIÓN - BOTÓN 'CATEGORÍAS'
+   Verificar que el botón 'CATEGORÍAS' realiza la acción esperada y maneja errores correctamente.
+
+28. INTERACCIÓN - BOTÓN 'boton_sin_texto_20'
+   Verificar que el botón 'boton_sin_texto_20' realiza la acción esperada y maneja errores correctamente.
+
+29. INTERACCIÓN - BOTÓN 'boton_sin_texto_21'
+   Verificar que el botón 'boton_sin_texto_21' realiza la acción esperada y maneja errores correctamente.
+
+30. INTERACCIÓN - BOTÓN 'boton_sin_texto_22'
+   Verificar que el botón 'boton_sin_texto_22' realiza la acción esperada y maneja errores correctamente.
+
+31. INTERACCIÓN - BOTÓN 'boton_sin_texto_23'
+   Verificar que el botón 'boton_sin_texto_23' realiza la acción esperada y maneja errores correctamente.
+
+32. INTERACCIÓN - BOTÓN 'boton_sin_texto_24'
+   Verificar que el botón 'boton_sin_texto_24' realiza la acción esperada y maneja errores correctamente.
+
+33. INTERACCIÓN - BOTÓN 'boton_sin_texto_25'
+   Verificar que el botón 'boton_sin_texto_25' realiza la acción esperada y maneja errores correctamente.
+
+34. INTERACCIÓN - BOTÓN 'boton_sin_texto_26'
+   Verificar que el botón 'boton_sin_texto_26' realiza la acción esperada y maneja errores correctamente.
+
+35. INTERACCIÓN - BOTÓN 'boton_sin_texto_27'
+   Verificar que el botón 'boton_sin_texto_27' realiza la acción esperada y maneja errores correctamente.
+
+36. INTERACCIÓN - BOTÓN 'boton_sin_texto_28'
+   Verificar que el botón 'boton_sin_texto_28' realiza la acción esperada y maneja errores correctamente.
+
+37. INTERACCIÓN - BOTÓN 'Tata'
+   Verificar que el botón 'Tata' realiza la acción esperada y maneja errores correctamente.
+
+38. INTERACCIÓN - BOTÓN 'Beneficios'
+   Verificar que el botón 'Beneficios' realiza la acción esperada y maneja errores correctamente.
+
+39. INTERACCIÓN - BOTÓN 'Mis Compras'
+   Verificar que el botón 'Mis Compras' realiza la acción esperada y maneja errores correctamente.
+
+</pre></section><section><h2>Resultados de ejecución</h2><pre>Resumen de cobertura:
+- Inputs evaluados: 5 de 5 encontrados (0 omitidos por no tener identificador utilizable)
+- Botones evaluados: 9 de 32 encontrados (23 omitidos por no tener texto visible/aria-label)
+- Formulario: evaluado
+
+⚠️ SKIP: 23 botón(es) sin texto ignorados (sin aria-label/texto visible para localizarlos)
+✅ PASS: Campo 'Buscar' acepta texto
+❌ FAIL: Campo 'Buscar' NO tiene validación — acepta envío vacío sin error
+✅ PASS: Campo 'newsletter-email' acepta texto
+✅ PASS: Campo 'newsletter-email' muestra error en el DOM al enviar vacío
+✅ PASS: Campo 'newsletter-email' valida formato de email
+✅ PASS: Botón 'TaTa' es visible y clickeable
+✅ PASS: Botón 'CATEGORÍAS' es visible y clickeable
+✅ PASS: Botón 'Tata' es visible y clickeable
+❌ FAIL: Botón 'Beneficios' → no encontrado
+❌ FAIL: Botón 'Mis Compras' → no encontrado
+✅ PASS: Formulario presente (5 forms)
 </pre></section><section><h2>Análisis de seguridad (XSS reflejado)</h2><pre class='ok'>No se detectaron reflejos de XSS en los inputs analizados.</pre></section></body></html>

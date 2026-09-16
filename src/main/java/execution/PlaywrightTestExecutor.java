@@ -14,19 +14,50 @@ public class PlaywrightTestExecutor {
     public PlaywrightTestExecutor(Page page) {
         this.page = page;
     }
+
     public String ejecutarTests(PageInfo info) {
         StringBuilder resultados = new StringBuilder();
-        List<String> inputsList = new ArrayList<>(new LinkedHashSet<>(info.inputNames));
-        List<String> botonesList = new ArrayList<>(new LinkedHashSet<>(info.buttonTexts));
-        Set<String> inputsUnicos = new LinkedHashSet<>(inputsList.subList(0, Math.min(5, inputsList.size())));
-        Set<String> botonesUnicos = new LinkedHashSet<>(botonesList.subList(0, Math.min(5, botonesList.size())));
+
+        // --- Inputs: filtramos los no identificables ANTES de armar la lista a probar ---
+        List<String> inputsCandidatos = new ArrayList<>(new LinkedHashSet<>(info.inputNames));
+        List<String> inputsOmitidos = new ArrayList<>();
+        List<String> inputsAProbar = new ArrayList<>();
+        for (String nombre : inputsCandidatos) {
+            if (nombre.startsWith("input_tipo_") || nombre.startsWith("input_sin_")) {
+                inputsOmitidos.add(nombre);
+            } else {
+                inputsAProbar.add(nombre);
+            }
+        }
+
+        // --- Botones: mismo criterio, filtramos los sin texto antes de armar la lista a probar ---
+        List<String> botonesCandidatos = new ArrayList<>(new LinkedHashSet<>(info.buttonTexts));
+        List<String> botonesOmitidos = new ArrayList<>();
+        List<String> botonesAProbar = new ArrayList<>();
+        for (String texto : botonesCandidatos) {
+            if (texto.startsWith("boton_sin_texto_")) {
+                botonesOmitidos.add(texto);
+            } else {
+                botonesAProbar.add(texto);
+            }
+        }
+
+        // Ya no truncamos a 5 arbitrariamente: probamos todos los elementos identificables.
+        // Si en algún sitio esto resulta demasiado lento, conviene paginar/paralelizar
+        // en vez de descartar candidatos en silencio.
+
+        if (!inputsOmitidos.isEmpty()) {
+            resultados.append("⚠️ SKIP: ").append(inputsOmitidos.size())
+                    .append(" input(s) sin identificar ignorados (")
+                    .append(String.join(", ", inputsOmitidos)).append(")\n");
+        }
+        if (!botonesOmitidos.isEmpty()) {
+            resultados.append("⚠️ SKIP: ").append(botonesOmitidos.size())
+                    .append(" botón(es) sin texto ignorados (sin aria-label/texto visible para localizarlos)\n");
+        }
 
         // Testear inputs
-        for (String nombre : inputsUnicos) {
-            if (nombre.startsWith("input_tipo_") || nombre.startsWith("input_sin_")) {
-                resultados.append("⚠️ SKIP: Input sin identificar ignorado\n");
-                continue;
-            }
+        for (String nombre : inputsAProbar) {
             try {
                 Locator input = page.locator(
                         "input[placeholder='" + nombre + "'], input[name='" + nombre + "'], input[id='" + nombre + "']"
@@ -94,8 +125,7 @@ public class PlaywrightTestExecutor {
         }
 
         // Testear botones
-        for (String texto : botonesUnicos) {
-            if (texto.startsWith("boton_sin_texto_")) continue;
+        for (String texto : botonesAProbar) {
             try {
                 Locator boton = page.locator("button").filter(new Locator.FilterOptions().setHasText(texto)).first();
                 boton.waitFor(new Locator.WaitForOptions().setTimeout(1500));
